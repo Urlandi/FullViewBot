@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
  - Calculate prefix and ASes statistic
  - Plot monthly charts 
  - Send to telegram bot
+### Fixed
+ - Typos
 
 
 [Unreleased]: https://github.com/urlandi/FullViewBot/
