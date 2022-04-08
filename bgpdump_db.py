@@ -189,11 +189,13 @@ def plot_bgp_prefixes_trend(period, db):
 
     bgp_timestamps_history, bgp4_history, bgp6_history = db_api.load_prefixes(period, db, False, True)
 
+    monthname=datetime.utcfromtimestamp(bgp_timestamps_history[0]).strftime("%B")
+
     prefixes4_chart = _plot_bgp_prefixes_trend(bgp4_history)
-    prefixes4_chart.title = resources_messages.bgp4_prefix_trend_chart_title
+    prefixes4_chart.title = resources_messages.bgp4_prefix_trend_chart_title.format(monthname)
 
     prefixes6_chart = _plot_bgp_prefixes_trend(bgp6_history)
-    prefixes6_chart.title = resources_messages.bgp6_prefix_trend_chart_title
+    prefixes6_chart.title = resources_messages.bgp6_prefix_trend_chart_title.format(monthname)
 
     try:
         prefixes4_chart.render_to_png(_bgp4_prefix_chart_name)

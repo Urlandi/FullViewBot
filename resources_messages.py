@@ -61,5 +61,5 @@ bgp_changed_msg = ", {:+d} prefixes since last dump, {:+d} since last week."
 bgp4_prefix_length_chart_title = 'Top of IPv4 prefixes'
 bgp6_prefix_length_chart_title = 'Top of IPv6 prefixes'
 
-bgp4_prefix_trend_chart_title = 'Monthly BGPv4 full view changes'
-bgp6_prefix_trend_chart_title = 'Monthly BGPv6 full view changes'
+bgp4_prefix_trend_chart_title = '{:s} BGPv4 full view changes'
+bgp6_prefix_trend_chart_title = '{:s} BGPv6 full view changes'
