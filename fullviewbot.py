@@ -19,7 +19,7 @@ import logging
 repost_task = None
 
 
-def scheduler(db, bot, bgp_timestamp=0):
+def scheduler(db, bot, bgp_timestamp):
 
     bgp_timestamp, bgp4_status, bgp6_status = get_bgp_prefixes(bgp_timestamp, db)
     if bgp4_status and bgp6_status:
@@ -35,7 +35,7 @@ def scheduler(db, bot, bgp_timestamp=0):
     day4hour = date4hour.day
     hour4hour = date4hour.hour
 
-    if day4hour == 1 and hour4hour == 0 or True:
+    if day4hour == 1 and hour4hour == 0:
 
         bgp4_plot, bgp6_plot = plot_bgp_prefixes_length()
         if bgp4_plot is not None and bgp6_plot is not None:
@@ -61,7 +61,7 @@ def scheduler(db, bot, bgp_timestamp=0):
     timer_start_at = (timenow // next_start_in + 1) * next_start_in - timenow + internet_wait
 
     global repost_task
-    repost_task = Timer(timer_start_at, scheduler, (db, bot))
+    repost_task = Timer(timer_start_at, scheduler, (db, bot, bgp_timestamp))
     repost_task.start()
 
     return 0
@@ -89,7 +89,7 @@ def main():
 
     logging.debug("Database status loading")
     bgp_timestamp, bgp4_last_status, bgp6_last_status = update_bgp_table_status(subscribers_database)
-    bgp_timestamp=0
+
     if bgp_timestamp is None or bgp4_last_status is None or bgp6_last_status is None:
         exit_status_code = STOP_AND_EXIT
         return exit_status_code
