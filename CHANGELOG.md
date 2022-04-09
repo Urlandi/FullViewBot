@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+
+## 0.5.0 - 2022-04-09
 ### Added
  - Read and parse RIPE RIS raw data
  - Calculate prefix and ASes statistic
@@ -14,4 +17,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
  - Typos
 
 
-[Unreleased]: https://github.com/urlandi/FullViewBot/
+[Unreleased]: https://github.com/urlandi/FullViewBot/compare/v0.5.0...HEAD
