@@ -19,9 +19,9 @@ import logging
 repost_task = None
 
 
-def scheduler(db, bot, bgp_timestamp):
+def scheduler(db, bot, status_timestamp):
 
-    bgp_timestamp, bgp4_status, bgp6_status = get_bgp_prefixes(bgp_timestamp, db)
+    bgp_timestamp, bgp4_status, bgp6_status = get_bgp_prefixes(status_timestamp, db)
     if bgp4_status and bgp6_status:
         update_status_all_v4(bot, bgp4_status)
         update_status_all_v6(bot, bgp6_status)
