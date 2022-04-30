@@ -51,11 +51,11 @@ If you don't know what can you do, please read the /help page."
 bgp4_status_msg = "There are <b>{:d}</b> prefixes from {:d} ASes in the BGPv4 full view{:s} " \
                   "\nThe most encounter /{:s} has {:.1f}% of the total. " \
                   "{:.1f}% ASes announce IPv4 prefixes only, and {:.1f}% are 32-bit ASn." \
-                  "\n--- <i><a href=\"https://www.ripe.net/analyse/internet-measurements/routing-information-service-ris/ris-raw-data\">rrc13</a> at {:s}</i>"
+                  "\n--- <i><a href=\"https://www.ris.ripe.net/peerlist/all.shtml\">rrc13</a> at {:s}</i>"
 bgp6_status_msg = "There are <b>{:d}</b> prefixes from {:d} ASes in the BGPv6 full view{:s} " \
                   "\nThe most encounter /{:s} has {:.1f}% of the total. " \
                   "{:.1f}% ASes announce IPv6 prefixes only, and {:.1f}% are 32-bit ASn." \
-                  "\n--- <i><a href=\"https://www.ripe.net/analyse/internet-measurements/routing-information-service-ris/ris-raw-data\">rrc13</a> at {:s}</i>"
+                  "\n--- <i><a href=\"https://www.ris.ripe.net/peerlist/all.shtml\">rrc13</a> at {:s}</i>"
 bgp_changed_msg = ", {:+d} prefixes since last dump, {:+d} since last week."
 
 bgp4_prefix_length_chart_title = 'Top of IPv4 prefixes'
