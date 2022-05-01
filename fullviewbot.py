@@ -31,7 +31,7 @@ def scheduler(db, bot, status_timestamp):
     in_four_hour = 4 * in_an_hour
 
     timenow = round(datetime.now().timestamp())
-    date4hour = datetime.fromtimestamp(timenow + in_four_hour)
+    date4hour = datetime.fromtimestamp(timenow + in_an_hour)
     day4hour = date4hour.day
     hour4hour = date4hour.hour
 
