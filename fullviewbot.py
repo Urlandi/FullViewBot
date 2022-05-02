@@ -6,7 +6,7 @@ from dateutil.relativedelta import relativedelta
 from subscribers_db import save_bgp_table_status, update_bgp_table_status
 from subscribers_db import subscriber_v4_add, subscriber_v6_add, subscribers_flush
 
-from bgpdump_db import get_bgp_prefixes, plot_bgp_prefixes_length, plot_bgp_prefixes_trend
+from bgpdump_db import get_bgp_prefixes, plot_bgp_prefixes_length, plot_bgp_prefixes_month
 
 from telegram_bot import telegram_connect
 from telegram_bot_handlers import update_status_all_v4, update_status_all_v6
@@ -21,32 +21,39 @@ repost_task = None
 
 def scheduler(db, bot, status_timestamp):
 
+    timenow = datetime.now()
+    timestampnow = round(timenow.timestamp())
+
+    prefix_length_schedule_day = 1
+    prefix_length_schedule_hour = 14
+
     bgp_timestamp, bgp4_status, bgp6_status = get_bgp_prefixes(status_timestamp, db)
     if bgp4_status and bgp6_status:
         update_status_all_v4(bot, bgp4_status)
         update_status_all_v6(bot, bgp6_status)
         save_bgp_table_status(bgp_timestamp, bgp4_status, bgp6_status, db)
 
+        if timenow.weekday() == prefix_length_schedule_day and timenow.hour == prefix_length_schedule_hour:
+            bgp4_plot, bgp6_plot = plot_bgp_prefixes_length()
+            if bgp4_plot is not None and bgp6_plot is not None:
+                update_status_all_v4(bot, bgp4_plot)
+                update_status_all_v6(bot, bgp6_plot)
+
+                bgp4_plot.close()
+                bgp6_plot.close()
+
     in_an_hour = 3600
-    in_four_hour = 4 * in_an_hour
 
-    timenow = round(datetime.now().timestamp())
-    date4hour = datetime.fromtimestamp(timenow + in_an_hour)
-    day4hour = date4hour.day
-    hour4hour = date4hour.hour
+    prefix_history_scheduler_day = 1
+    prefix_history_scheduler_hour = 16
 
-    if day4hour == 1 and hour4hour == 0:
+    if timenow.day == prefix_history_scheduler_day and timenow.hour == prefix_history_scheduler_hour:
 
-        bgp4_plot, bgp6_plot = plot_bgp_prefixes_length()
-        if bgp4_plot is not None and bgp6_plot is not None:
-            update_status_all_v4(bot, bgp4_plot)
-            update_status_all_v6(bot, bgp6_plot)
+        prev_month_date = timenow - relativedelta(days=10)
 
-            bgp4_plot.close()
-            bgp6_plot.close()
+        last_month = round(datetime(prev_month_date.year, prev_month_date.month, 1).timestamp())
 
-        last_month = round((date4hour - relativedelta(months=1, hours=1)).timestamp())
-        bgp4_plot, bgp6_plot = plot_bgp_prefixes_trend(last_month, db)
+        bgp4_plot, bgp6_plot = plot_bgp_prefixes_month(last_month, db)
         if bgp4_plot is not None and bgp6_plot is not None:
             update_status_all_v4(bot, bgp4_plot)
             update_status_all_v6(bot, bgp6_plot)
@@ -58,7 +65,7 @@ def scheduler(db, bot, status_timestamp):
 
     internet_wait = 30
 
-    timer_start_at = (timenow // next_start_in + 1) * next_start_in - timenow + internet_wait
+    timer_start_at = (timestampnow // next_start_in + 1) * next_start_in - timestampnow + internet_wait
 
     global repost_task
     repost_task = Timer(timer_start_at, scheduler, (db, bot, bgp_timestamp))

@@ -165,36 +165,51 @@ def plot_bgp_prefixes_length():
     return bgp4_prefix_chart_file, bgp6_prefix_chart_file
 
 
-def _plot_bgp_prefixes_trend(_bgp_prefixes_history):
+def _plot_bgp_prefixes_month(bgp_prefixes_history, bgp_prefixes_timestamp):
     prefix_chart_config = pygal.Config()
     prefix_chart_config.width = CHART_WIDTH
     prefix_chart_config.height = CHART_HEIGHT
     prefix_chart_config.show_legend = False
     prefix_chart_config.fill = True
     prefix_chart_config.style = PygalStyle(colors=('Navy',))
+    prefix_chart_config.x_labels_major_every = 14
+    prefix_chart_config.x_label_rotation = 40
+    prefix_chart_config.show_minor_x_labels = False
 
     prefixes_chart = pygal.Line(prefix_chart_config)
 
     bgp_prefixes_trend = list()
-    for prefixes_dump in _bgp_prefixes_history:
+    for prefixes_dump in bgp_prefixes_history:
         prefixes_count = _count_prefixes(prefixes_dump)[1]
         bgp_prefixes_trend.append(prefixes_count)
 
     prefixes_chart.add('Prefixes', bgp_prefixes_trend)
-
+    prefixes_chart.x_labels = list(map(lambda timestamp:
+                                       datetime.utcfromtimestamp(timestamp).strftime("%b %d %H:%M"),
+                                       bgp_prefixes_timestamp))
     return prefixes_chart
 
 
-def plot_bgp_prefixes_trend(period, db):
+def plot_bgp_prefixes_month(period, db):
 
     bgp_timestamps_history, bgp4_history, bgp6_history = db_api.load_prefixes(period, db, False, True)
 
-    monthname = datetime.utcfromtimestamp(bgp_timestamps_history[-1]).strftime("%B")
+    if bgp_timestamps_history is None or bgp4_history is None or bgp6_history is None:
+        return db_api.ERROR_STATE, db_api.ERROR_STATE
 
-    prefixes4_chart = _plot_bgp_prefixes_trend(bgp4_history)
+    date_period = datetime.utcfromtimestamp(bgp_timestamps_history[0])
+    monthname = date_period.strftime("%B")
+    month = date_period.month
+
+    bgp_timestamps_month = list(filter(lambda timestamp: datetime.utcfromtimestamp(timestamp).month == month,
+                                bgp_timestamps_history))
+
+    month_length = len(bgp_timestamps_month)
+
+    prefixes4_chart = _plot_bgp_prefixes_month(bgp4_history[:month_length], bgp_timestamps_history[:month_length])
     prefixes4_chart.title = resources_messages.bgp4_prefix_trend_chart_title.format(monthname)
 
-    prefixes6_chart = _plot_bgp_prefixes_trend(bgp6_history)
+    prefixes6_chart = _plot_bgp_prefixes_month(bgp6_history[:month_length], bgp_timestamps_history[:month_length])
     prefixes6_chart.title = resources_messages.bgp6_prefix_trend_chart_title.format(monthname)
 
     try:
