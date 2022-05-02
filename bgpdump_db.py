@@ -158,7 +158,7 @@ def plot_bgp_prefixes_length():
         bgp4_prefix_chart_file = open(_bgp4_prefix_chart_name, 'rb')
         bgp6_prefix_chart_file = open(_bgp6_prefix_chart_name, 'rb')
 
-    except (IOError or FileExistsError or FileNotFoundError or OSError) as e:
+    except (IOError, FileExistsError, FileNotFoundError, OSError) as e:
         logging.error("RW chart file error - {}".format(e))
         return db_api.ERROR_STATE, db_api.ERROR_STATE
 
@@ -219,7 +219,7 @@ def plot_bgp_prefixes_month(period, db):
         bgp4_prefix_chart_file = open(_bgp4_prefix_chart_name, 'rb')
         bgp6_prefix_chart_file = open(_bgp6_prefix_chart_name, 'rb')
 
-    except (IOError or FileExistsError or FileNotFoundError or OSError) as e:
+    except (IOError, FileExistsError, FileNotFoundError, OSError) as e:
         logging.error("RW chart file error - {}".format(e))
         return db_api.ERROR_STATE, db_api.ERROR_STATE
 

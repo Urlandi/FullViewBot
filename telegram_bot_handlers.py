@@ -5,6 +5,8 @@ import logging
 import telegram
 import resources_messages
 
+from pathlib import Path
+
 from queue import Queue, Empty
 from threading import Thread
 
@@ -101,7 +103,7 @@ def send_status(bot, subscriber_id, message):
                              parse_mode=telegram.ParseMode.HTML,
                              disable_web_page_preview=True)
         else:
-            bot.send_photo(chat_id=subscriber_id, photo=message)
+            bot.send_photo(chat_id=subscriber_id, photo=open(message.name, 'rb'))
 
     except (telegram.error.Unauthorized,
             telegram.error.BadRequest,
@@ -113,6 +115,10 @@ def send_status(bot, subscriber_id, message):
     except telegram.error.TelegramError as e:
 
         logging.error("{:d} sending skipped because - {}".format(subscriber_id, e))
+
+    except (IOError, FileExistsError, FileNotFoundError, OSError) as e:
+
+        logging.error("{:d} sending file {} skipped because  - {}".format(subscriber_id, message, e))
 
     return sent
 
