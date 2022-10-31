@@ -28,7 +28,7 @@ Also the /help command shows some helpful information about me."
 settings_msg = "You may choose about which BGP full view - IPv4, or IPv6, or both you'll receive."
 
 help_msg = "Hello, I'm a BGP FullView Telegram bot. I calculate some statistic about IP prefixes and ASes from the \
-<a href=\"http://data.ris.ripe.net/rrc13/\">rrc13.ripe.net/latest-bview.gz</a> \
+<a href=\"http://data.ris.ripe.net/rrc01/\">rrc01.ripe.net/latest-bview.gz</a> \
 raw data file which is managed by the \
 <a href=\"https://www.ripe.net/analyse/internet-measurements/routing-information-service-ris\
 /routing-information-service-ris\">RIPE NCC RIS project</a> and contains a whole Internet route table dump.\n\n\
@@ -51,11 +51,11 @@ If you don't know what can you do, please read the /help page."
 bgp4_status_msg = "There are <b>{:d}</b> prefixes from {:d} ASes in the BGPv4 full view{:s} " \
                   "\nThe most encounter /{:s} has {:.1f}% of the total. " \
                   "{:.1f}% ASes announce IPv4 prefixes only, and {:.1f}% are 32-bit ASn." \
-                  "\n--- <i><a href=\"https://www.ris.ripe.net/peerlist/all.shtml\">rrc13</a> at {:s}</i>"
+                  "\n--- <i><a href=\"https://www.ris.ripe.net/peerlist/all.shtml\">rrc01</a> at {:s}</i>"
 bgp6_status_msg = "There are <b>{:d}</b> prefixes from {:d} ASes in the BGPv6 full view{:s} " \
                   "\nThe most encounter /{:s} has {:.1f}% of the total. " \
                   "{:.1f}% ASes announce IPv6 prefixes only, and {:.1f}% are 32-bit ASn." \
-                  "\n--- <i><a href=\"https://www.ris.ripe.net/peerlist/all.shtml\">rrc13</a> at {:s}</i>"
+                  "\n--- <i><a href=\"https://www.ris.ripe.net/peerlist/all.shtml\">rrc01</a> at {:s}</i>"
 bgp_changed_msg = ", {:+d} prefixes since last dump, {:+d} since last week."
 
 bgp4_prefix_length_chart_title = 'Top of IPv4 prefixes'
