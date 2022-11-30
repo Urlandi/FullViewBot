@@ -1,4 +1,4 @@
 SHELL=/bin/bash
 
 */15 * * * * root /opt/FullView/bot_cronjob.sh &>> /opt/FullView/bot_cronjob.log
-45 5,13,21 * * * root /opt/FullView/bgpdump-stat.sh &>> /opt/FullView/bot_cronjob.log
+35 5,13,21 * * * root /opt/FullView/bgpdump-stat.sh &>> /opt/FullView/bot_cronjob.log

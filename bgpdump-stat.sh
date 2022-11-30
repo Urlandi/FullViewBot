@@ -20,7 +20,7 @@ ases6file="${WORKDIR}/${ASES6}"
 
 trap "rm -f ${dumpfile}" 0 1 2 3 6 9 15
 
-curl -s "https://data.ris.ripe.net/rrc01/${DUMP}" -o "${dumpfile}" || exit "${CURL_ERROR}"
+curl -s "https://data.ris.ripe.net/rrc00/${DUMP}" -o "${dumpfile}" || exit "${CURL_ERROR}"
 
 dumptime="$(bgpdump -m -v -l ${dumpfile} | head -1 | cut -d'|' -f2)"
 
