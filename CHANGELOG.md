@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
  - rrc13 to rrc07 then rrc01 next rrc00
  - crontab: dump gets earlier for ten munites
+ - bgpgrep for list all
 
 ## 0.5.0 - 2022-04-09
 ### Added
