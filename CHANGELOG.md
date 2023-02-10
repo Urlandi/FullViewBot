@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-## [1.0.0]
+## [1.0.0] - 2022-02-10
 ### Changed
  - rrc13 to rrc07 then rrc01 next rrc00
  - crontab: dump gets earlier for ten munites
