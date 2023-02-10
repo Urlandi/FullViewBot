@@ -30,7 +30,7 @@ bgpgrep "${dumpfile}" 2> /dev/null | cut -d'|' -f2 | sort -u | sed -n -e 's/.*:.
     sort -t' ' -k1,1 -k3,3 -k2,2 | uniq -c | sed -n -e 's/^\s\+//p' |\
     sed -n -e "1s/.*/insert into prefixes values(${dumptime},\"\0/;:start;N;s/\n/;/;$ b next;b start;:next;s/\( v4 [0-9]\+\);\([0-9]\+ v6\)/\1\",\"\2/;s/\([0-9]\+\) v[46] \([0-9]\+\)/\2,\1/g;s/.*/\0\");/p" | sqlite3 -batch "${databasefile}"
 
-bgpgrep "${dumpfile}" | cut -f2,3 -d'|' | sed -n -e 's/.*:.*|/v6,/;s/.*\..*|/v4,/;s/,.*\s\+/,/p' | tr -d '{' | tr -d '}' | sort -u > "${asesfile}"
+bgpgrep "${dumpfile}" 2> /dev/null | cut -f2,3 -d'|' | sed -n -e 's/.*:.*|/v6,/;s/.*\..*|/v4,/;s/,.*\s\+/,/p' | tr -d '{' | tr -d '}' | sort -u > "${asesfile}"
 ases4_count="$(cat ${asesfile} | grep 'v4' | cut -f2- -d, | tr , '\n' | sort -u | tee ${ases4file} | wc -l)"
 ases6_count="$(cat ${asesfile} | grep 'v6' | cut -f2- -d, | tr , '\n' | sort -u | tee ${ases6file} | wc -l)"
 
