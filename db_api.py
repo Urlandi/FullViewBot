@@ -287,7 +287,7 @@ def load_prefixes(timestamp=0, subscribers_db=None, last=True, trend=False):
     return bgp_timestamp, bgp4_prefixes, bgp6_prefixes
 
 
-def load_ases(timestamp, subscribers_db=None):
+def load_ases(timestamp, subscribers_db=None, last=True, trend=False):
 
     if subscribers_db is None:
         if _database_global_handler is None:
@@ -297,13 +297,30 @@ def load_ases(timestamp, subscribers_db=None):
     else:
         db = subscribers_db
 
-    db_query = "SELECT * FROM ases WHERE ases.DUMP_TIME = {:d} LIMIT 1".format(timestamp)
+    ases_fields = ("ases.DUMP_TIME",
+                   "ases.ASNV4", "ases.ASNV6",
+                   "ases.ASNV4_ONLY", "ases.ASNV6_ONLY",
+                   "ases.ASNV4_32", "ases.ASNV6_32")
+
+    if last:
+        order = 'DESC'
+    else:
+        order = 'ASC'
+
+    db_query = "SELECT {:s} FROM ases WHERE ases.DUMP_TIME > {:d} " \
+               "ORDER BY ases.DUMP_TIME {:s}".format(",".join(ases_fields), timestamp, order)
+
+    if trend is False:
+        db_query = "SELECT {:s} FROM ases WHERE ases.DUMP_TIME = {:d} LIMIT 1".format(",".join(ases_fields), timestamp)
 
     try:
         db_cursor = db.cursor()
         db_cursor.execute(db_query)
 
-        ases = db_cursor.fetchone()
+        if trend:
+            ases = db_cursor.fetchall()
+        else:
+            ases = db_cursor.fetchone()
 
     except db_api.DatabaseError as e:
         logging.critical("Database select error - {}".format(e))
@@ -313,6 +330,19 @@ def load_ases(timestamp, subscribers_db=None):
         # logging.critical("Database BGP statuses returned empty data")
         return timestamp, (ERROR_STATE,)
 
-    bgp_timestamp = ases[0]
+    if trend:
+        bgp_timestamp = list()
+        ases_status = list()
 
-    return bgp_timestamp, ases[1:]
+        for dump_trend in ases:
+            bgp_timestamp.append(dump_trend[0])
+            ases_dump = list()
+            for ases_trend in dump_trend[1:]:
+                ases_dump.append(ases_trend)
+
+            ases_status.append(ases_dump)
+    else:
+        bgp_timestamp = ases[0]
+        ases_status = ases[1:]
+
+    return bgp_timestamp, ases_status

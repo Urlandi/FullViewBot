@@ -6,7 +6,7 @@ from dateutil.relativedelta import relativedelta
 from subscribers_db import save_bgp_table_status, update_bgp_table_status
 from subscribers_db import subscriber_v4_add, subscriber_v6_add, subscribers_flush
 
-from bgpdump_db import get_bgp_prefixes, plot_bgp_prefixes_length, plot_bgp_prefixes_month
+from bgpdump_db import get_bgp_prefixes, plot_bgp_prefixes_length, plot_bgp_prefixes_month, plot_bgp_ases_month
 
 from telegram_bot import telegram_connect
 from telegram_bot_handlers import update_status_all_v4, update_status_all_v6
@@ -42,8 +42,6 @@ def scheduler(db, bot, status_timestamp):
                 bgp4_plot.close()
                 bgp6_plot.close()
 
-    in_an_hour = 3600
-
     prefix_history_scheduler_day = 1
     prefix_history_scheduler_hour = 16
 
@@ -61,6 +59,15 @@ def scheduler(db, bot, status_timestamp):
             bgp4_plot.close()
             bgp6_plot.close()
 
+        bgp4_plot, bgp6_plot = plot_bgp_ases_month(last_month, db)
+        if bgp4_plot is not None and bgp6_plot is not None:
+            update_status_all_v4(bot, bgp4_plot)
+            update_status_all_v6(bot, bgp6_plot)
+
+            bgp4_plot.close()
+            bgp6_plot.close()
+
+    in_an_hour = 3600
     next_start_in = in_an_hour
 
     internet_wait = 30

@@ -69,7 +69,6 @@ def get_bgp_prefixes(timestamp, db):
     if (bgp_timestamp_week < bgp_timestamp_prev < bgp_timestamp) and \
             bgp4_prefixes_dump_prev and bgp6_prefixes_dump_prev and \
             bgp4_prefixes_dump_week and bgp6_prefixes_dump_week:
-
         bgp4_prefixes_prev, bgp4_prefixes_count_prev, bgp4_prefix_top_count_prev, bgp4_prefix_top_prev = \
             _count_prefixes(bgp4_prefixes_dump_prev)
 
@@ -115,7 +114,6 @@ def get_bgp_prefixes(timestamp, db):
 
 
 def _plot_bgp_prefixes(bgp_prefixes):
-
     prefix_chart_config = pygal.Config()
     prefix_chart_config.width = CHART_WIDTH
     prefix_chart_config.height = CHART_HEIGHT
@@ -137,7 +135,7 @@ def _plot_bgp_prefixes(bgp_prefixes):
                        format(value / prefixes_sum * 100))
 
     for prefix in reversed(prefix_length[:chart_values_count]):
-        prefixes_chart.add(prefix, [{'value': bgp_prefixes[prefix], 'label':'/'+prefix}],
+        prefixes_chart.add(prefix, [{'value': bgp_prefixes[prefix], 'label': '/' + prefix}],
                            formatter=lambda value: "{:.1f}%".
                            format(value / prefixes_sum * 100))
 
@@ -191,7 +189,6 @@ def _plot_bgp_prefixes_month(bgp_prefixes_history, bgp_prefixes_timestamp):
 
 
 def plot_bgp_prefixes_month(period, db):
-
     bgp_timestamps_history, bgp4_history, bgp6_history = db_api.load_prefixes(period, db, False, True)
 
     if bgp_timestamps_history is None or bgp4_history is None or bgp6_history is None:
@@ -202,7 +199,7 @@ def plot_bgp_prefixes_month(period, db):
     month = date_period.month
 
     bgp_timestamps_month = list(filter(lambda timestamp: datetime.utcfromtimestamp(timestamp).month == month,
-                                bgp_timestamps_history))
+                                       bgp_timestamps_history))
 
     month_length = len(bgp_timestamps_month)
 
@@ -215,6 +212,68 @@ def plot_bgp_prefixes_month(period, db):
     try:
         prefixes4_chart.render_to_png(_bgp4_prefix_chart_name)
         prefixes6_chart.render_to_png(_bgp6_prefix_chart_name)
+
+        bgp4_prefix_chart_file = open(_bgp4_prefix_chart_name, 'rb')
+        bgp6_prefix_chart_file = open(_bgp6_prefix_chart_name, 'rb')
+
+    except (IOError, FileExistsError, FileNotFoundError, OSError) as e:
+        logging.error("RW chart file error - {}".format(e))
+        return db_api.ERROR_STATE, db_api.ERROR_STATE
+
+    return bgp4_prefix_chart_file, bgp6_prefix_chart_file
+
+
+def _plot_bgp_ases_month(bgp_ases_history, bgp_second_ases_history, bgp_ases_timestamp):
+    ases_chart_config = pygal.Config()
+    ases_chart_config.width = CHART_WIDTH
+    ases_chart_config.height = CHART_HEIGHT
+    ases_chart_config.show_legend = False
+    ases_chart_config.fill = True
+    ases_chart_config.style = PygalStyle(colors=('Gold', 'Green',))
+    ases_chart_config.x_labels_major_every = 14
+    ases_chart_config.x_label_rotation = 40
+    ases_chart_config.show_minor_x_labels = False
+
+    ases_chart = pygal.Line(ases_chart_config)
+
+    ases_chart.add('ASes', bgp_ases_history)
+    # ases_chart.add('Only ASes', bgp_second_ases_history, secondary=True, fill=False)
+    ases_chart.x_labels = list(map(lambda timestamp:
+                                   datetime.utcfromtimestamp(timestamp).strftime("%b %d %H:%M"),
+                                   bgp_ases_timestamp))
+    return ases_chart
+
+
+def plot_bgp_ases_month(period, db):
+    bgp_timestamps_history, ases_history = db_api.load_ases(period, db, False, True)
+
+    if bgp_timestamps_history is None or ases_history[0] is None:
+        return db_api.ERROR_STATE, db_api.ERROR_STATE
+
+    date_period = datetime.utcfromtimestamp(bgp_timestamps_history[0])
+    monthname = date_period.strftime("%B")
+    month = date_period.month
+
+    bgp_timestamps_month = list(filter(lambda timestamp: datetime.utcfromtimestamp(timestamp).month == month,
+                                       bgp_timestamps_history))
+
+    month_length = len(bgp_timestamps_month)
+
+    bgp4_ases_history = list(map(lambda ases_dump: ases_dump[0], ases_history))
+    bgp4_only_ases_history = list(map(lambda ases_dump: ases_dump[2], ases_history))
+    ases4_chart = _plot_bgp_ases_month(bgp4_ases_history[:month_length], bgp4_only_ases_history[:month_length],
+                                       bgp_timestamps_history[:month_length])
+    ases4_chart.title = resources_messages.bgp4_ases_trend_chart_title.format(monthname)
+
+    bgp6_ases_history = list(map(lambda ases_dump: ases_dump[1], ases_history))
+    bgp6_only_ases_history = list(map(lambda ases_dump: ases_dump[3], ases_history))
+    ases6_chart = _plot_bgp_ases_month(bgp6_ases_history[:month_length], bgp6_only_ases_history[:month_length],
+                                       bgp_timestamps_history[:month_length])
+    ases6_chart.title = resources_messages.bgp6_ases_trend_chart_title.format(monthname)
+
+    try:
+        ases4_chart.render_to_png(_bgp4_prefix_chart_name)
+        ases6_chart.render_to_png(_bgp6_prefix_chart_name)
 
         bgp4_prefix_chart_file = open(_bgp4_prefix_chart_name, 'rb')
         bgp6_prefix_chart_file = open(_bgp6_prefix_chart_name, 'rb')

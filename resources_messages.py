@@ -63,3 +63,6 @@ bgp6_prefix_length_chart_title = 'Top of IPv6 prefixes'
 
 bgp4_prefix_trend_chart_title = '{:s} BGPv4 full view changes'
 bgp6_prefix_trend_chart_title = '{:s} BGPv6 full view changes'
+
+bgp4_ases_trend_chart_title = '{:s} BGPv4 ASn count changes'
+bgp6_ases_trend_chart_title = '{:s} BGPv6 ASn count changes'
