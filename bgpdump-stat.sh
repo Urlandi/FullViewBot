@@ -2,7 +2,7 @@
 
 set -o nounset
 
-declare -r WORKDIR='.'
+declare -r WORKDIR='/opt/FullView'
 declare -r CURL_ERROR=1
 declare -r DUMP='latest-bview.gz'
 declare -r DATABASE='subscribers.sqlite3'
