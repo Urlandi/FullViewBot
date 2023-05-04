@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
  - Monthly ASes changes graph
  - Prefixes per ASn data
+### Changed
+ - Periodic status message was formatted
 
 ## [1.0.0] - 2022-02-10
 ### Changed

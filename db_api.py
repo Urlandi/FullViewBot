@@ -346,3 +346,37 @@ def load_ases(timestamp, subscribers_db=None, last=True, trend=False):
         ases_status = ases[1:]
 
     return bgp_timestamp, ases_status
+
+
+def load_ases_stat(timestamp, subscribers_db=None):
+
+    if subscribers_db is None:
+        if _database_global_handler is None:
+            return ERROR_STATE
+        else:
+            db = _database_global_handler
+    else:
+        db = subscribers_db
+
+    ases_fields = ("ases.DUMP_TIME",
+                   "ases.ASNV4_PREF", "ases.ASNV6_PREF")
+
+    db_query = "SELECT {:s} FROM ases WHERE ases.DUMP_TIME = {:d} LIMIT 1".format(",".join(ases_fields), timestamp)
+
+    try:
+        db_cursor = db.cursor()
+        db_cursor.execute(db_query)
+        ases_stat = db_cursor.fetchone()
+    except db_api.DatabaseError as e:
+        logging.critical("Database select error - {}".format(e))
+        return timestamp, (ERROR_STATE,)
+
+    if ases_stat is None or len(ases_stat) == 0:
+        # logging.critical("Database BGP statuses returned empty data")
+        return timestamp, (ERROR_STATE,)
+
+    bgp_timestamp = ases_stat[0]
+    ases4_prefixes = ases_stat[1]
+    ases6_prefixes = ases_stat[2]
+
+    return bgp_timestamp, ases4_prefixes, ases6_prefixes

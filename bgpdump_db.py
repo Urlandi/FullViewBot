@@ -43,6 +43,10 @@ def get_bgp_prefixes(timestamp, db):
     if bgp_timestamp != ases_timestamp or ases[0] is None:
         return timestamp, db_api.ERROR_STATE, db_api.ERROR_STATE
 
+    ases_stat_timestat, ases4_prefixes_dump, ases6_prefixes_dump = db_api.load_ases_stat(ases_timestamp, db)
+    if ases_stat_timestat != ases_timestamp or ases4_prefixes_dump is None or ases6_prefixes_dump is None:
+        return timestamp, db_api.ERROR_STATE, db_api.ERROR_STATE
+
     bgp4_prefixes, bgp4_prefixes_count, bgp4_prefix_top_count, bgp4_prefix_top = \
         _count_prefixes(bgp4_prefixes_dump)
 
@@ -55,6 +59,8 @@ def get_bgp_prefixes(timestamp, db):
     global _bgp6_prefixes
     _bgp6_prefixes = dict(sorted(bgp6_prefixes.items(), key=lambda prefix: prefix[1], reverse=True))
 
+    bgp4_ases_count, bgp6_ases_count, bgp4_ases_only, bgp6_ases_only, bgp4_ases_32, bgp6_ases_32 = ases
+
     bgp4_status_change = ''
     bgp6_status_change = ''
 
@@ -66,9 +72,15 @@ def get_bgp_prefixes(timestamp, db):
     bgp_timestamp_week, bgp4_prefixes_dump_week, bgp6_prefixes_dump_week = \
         db_api.load_prefixes(bgp_timestamp - since_week, db, last=False)
 
+    ases_timestamp_prev, ases_prev = db_api.load_ases(bgp_timestamp_prev, db)
+    ases_timestamp_week, ases_week = db_api.load_ases(bgp_timestamp_week, db)
+
     if (bgp_timestamp_week < bgp_timestamp_prev < bgp_timestamp) and \
             bgp4_prefixes_dump_prev and bgp6_prefixes_dump_prev and \
-            bgp4_prefixes_dump_week and bgp6_prefixes_dump_week:
+            bgp4_prefixes_dump_week and bgp6_prefixes_dump_week and \
+            (ases_timestamp_week < ases_timestamp_prev < ases_timestamp) and \
+            ases_prev and ases_week:
+
         bgp4_prefixes_prev, bgp4_prefixes_count_prev, bgp4_prefix_top_count_prev, bgp4_prefix_top_prev = \
             _count_prefixes(bgp4_prefixes_dump_prev)
 
@@ -87,12 +99,33 @@ def get_bgp_prefixes(timestamp, db):
         bgp4_change_week = bgp4_prefixes_count - bgp4_prefixes_count_week
         bgp6_change_week = bgp6_prefixes_count - bgp6_prefixes_count_week
 
-        bgp4_status_change = resources_messages.bgp_changed_msg.format(bgp4_change_prev, bgp4_change_week)
-        bgp6_status_change = resources_messages.bgp_changed_msg.format(bgp6_change_prev, bgp6_change_week)
+        bgp4_ases_count_prev, bgp6_ases_count_prev = ases_prev[:2]
+        bgp4_ases_count_week, bgp6_ases_count_week = ases_week[:2]
+
+        ases4_change_prev = bgp4_ases_count - bgp4_ases_count_prev
+        ases6_change_prev = bgp6_ases_count - bgp6_ases_count_prev
+
+        ases4_change_week = bgp4_ases_count - bgp4_ases_count_week
+        ases6_change_week = bgp6_ases_count - bgp6_ases_count_week
+
+        bgp4_status_change = resources_messages.bgp_changed_msg.format(bgp4_change_prev,
+                                                                       ases4_change_prev,
+                                                                       bgp4_change_week,
+                                                                       ases4_change_week)
+        bgp6_status_change = resources_messages.bgp_changed_msg.format(bgp6_change_prev,
+                                                                       ases6_change_prev,
+                                                                       ases6_change_week,
+                                                                       bgp6_change_week)
 
     bgp_timestamp_msg = datetime.utcfromtimestamp(bgp_timestamp).strftime("%H:%M %b %d")
 
-    bgp4_ases_count, bgp6_ases_count, bgp4_ases_only, bgp6_ases_only, bgp4_ases_32, bgp6_ases_32 = ases
+    ases4_prefixes, ases4_prefixes_count, ases4_prefix_top_count, ases4_prefix_top = \
+        _count_prefixes(ases4_prefixes_dump)
+    ases4_prefixes_max = max(list(map(int,ases4_prefixes.keys())))
+
+    ases6_prefixes, ases6_prefixes_count, ases6_prefix_top_count, ases6_prefix_top = \
+        _count_prefixes(ases6_prefixes_dump)
+    ases6_prefixes_max = max(list(map(int,ases6_prefixes.keys())))
 
     bgp4_status = resources_messages.bgp4_status_msg.format(
         bgp4_prefixes_count, bgp4_ases_count,
@@ -100,6 +133,7 @@ def get_bgp_prefixes(timestamp, db):
         bgp4_prefix_top,
         bgp4_prefix_top_count * 100 / bgp4_prefixes_count,
         bgp4_ases_only * 100 / bgp4_ases_count, bgp4_ases_32 * 100 / bgp4_ases_count,
+        ases4_prefix_top_count, ases4_prefix_top, ases4_prefixes_max,
         bgp_timestamp_msg)
 
     bgp6_status = resources_messages.bgp6_status_msg.format(
@@ -108,6 +142,7 @@ def get_bgp_prefixes(timestamp, db):
         bgp6_prefix_top,
         bgp6_prefix_top_count * 100 / bgp6_prefixes_count,
         bgp6_ases_only * 100 / bgp6_ases_count, bgp6_ases_32 * 100 / bgp6_ases_count,
+        ases6_prefix_top_count, ases6_prefix_top, ases6_prefixes_max,
         bgp_timestamp_msg)
 
     return bgp_timestamp, bgp4_status, bgp6_status

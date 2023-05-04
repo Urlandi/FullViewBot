@@ -48,15 +48,17 @@ Please read the /help page or make your own customization directly via the /sett
 subscriptions_empty_msg = "Oops, you haven't any subscriptions now. Go to the /settings menu to fix this. \
 If you don't know what can you do, please read the /help page."
 
-bgp4_status_msg = "There are <b>{:d}</b> prefixes from {:d} ASes in the BGPv4 full view{:s} " \
+bgp4_status_msg = "There are <b>{:d}</b> prefixes from <b>{:d}</b> ASes in the BGPv4 full view{:s} " \
                   "\nThe most encounter /{:s} has {:.1f}% of the total. " \
                   "{:.1f}% ASes announce IPv4 prefixes only, and {:.1f}% are 32-bit ASn." \
+                  " {:d} ASes advertise {:s} prefixes each, the greatest for an ASn is {:d} prefixes." \
                   "\n--- <i><a href=\"https://www.ris.ripe.net/peerlist/all.shtml\">rrc00</a> at {:s}</i>"
-bgp6_status_msg = "There are <b>{:d}</b> prefixes from {:d} ASes in the BGPv6 full view{:s} " \
+bgp6_status_msg = "There are <b>{:d}</b> prefixes from <b>{:d}</b> ASes in the BGPv6 full view{:s} " \
                   "\nThe most encounter /{:s} has {:.1f}% of the total. " \
                   "{:.1f}% ASes announce IPv6 prefixes only, and {:.1f}% are 32-bit ASn." \
+                  " {:d} ASes advertise {:s} prefixes each, the greatest for an ASn is {:d} prefixes." \
                   "\n--- <i><a href=\"https://www.ris.ripe.net/peerlist/all.shtml\">rrc00</a> at {:s}</i>"
-bgp_changed_msg = ", {:+d} prefixes since last dump, {:+d} since last week."
+bgp_changed_msg = ", {:+d} prefixes and {:+d} ASes since last dump, {:+d} and {:+d} since last week."
 
 bgp4_prefix_length_chart_title = 'Top of IPv4 prefixes'
 bgp6_prefix_length_chart_title = 'Top of IPv6 prefixes'
