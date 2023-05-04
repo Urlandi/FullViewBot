@@ -2,7 +2,7 @@ __pycache__/
 .idea/
 
 *config*
-*.sqlite3
+*.sqlite3*
 *.log
 *.png
 *.svg

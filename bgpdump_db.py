@@ -114,8 +114,8 @@ def get_bgp_prefixes(timestamp, db):
                                                                        ases4_change_week)
         bgp6_status_change = resources_messages.bgp_changed_msg.format(bgp6_change_prev,
                                                                        ases6_change_prev,
-                                                                       ases6_change_week,
-                                                                       bgp6_change_week)
+                                                                       bgp6_change_week,
+                                                                       ases6_change_week)
 
     bgp_timestamp_msg = datetime.utcfromtimestamp(bgp_timestamp).strftime("%H:%M %b %d")
 
