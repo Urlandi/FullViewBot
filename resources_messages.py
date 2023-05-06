@@ -34,7 +34,7 @@ raw data file which is managed by the \
 /routing-information-service-ris\">RIPE NCC RIS project</a> and contains a whole Internet route table dump.\n\n\
 Please go to the /settings menu, where you can setup which BGP table statistic v4 or v6 you would like to see. \
 The /start command subscribes you to all updates and the /stop unsubscribes and mutes.\n\n\
-Updates are every 8 hours at 6, 14, and 22 o'clock MSK timezone. \
+Updates are every 8 hours at 4, 12, and 20 o'clock MSK timezone. \
 The command /status sends the last posted status to the stream.\n\n\
 Was inspired by <a href=\"https://twitter.com/mellowdrifter\">Darren O'Connor</a> and his Twitter bots. \
 My author @UrgentPirate is open for questions and proposals. \

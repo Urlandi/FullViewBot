@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
  - Prefixes per ASn data
 ### Changed
  - Periodic status message was formatted
+ - Change post time
 
 ## [1.0.0] - 2022-02-10
 ### Changed
