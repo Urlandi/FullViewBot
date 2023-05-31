@@ -24,14 +24,14 @@ def scheduler(db, bot, status_timestamp):
     timenow = datetime.now()
     timestampnow = round(timenow.timestamp())
 
-    prefix_length_schedule_day = 1
-    prefix_length_schedule_hour = 14
-
     bgp_timestamp, bgp4_status, bgp6_status = get_bgp_prefixes(status_timestamp, db)
     if bgp4_status and bgp6_status:
         update_status_all_v4(bot, bgp4_status)
         update_status_all_v6(bot, bgp6_status)
         save_bgp_table_status(bgp_timestamp, bgp4_status, bgp6_status, db)
+
+        prefix_length_schedule_day = 1
+        prefix_length_schedule_hour = 12
 
         if timenow.weekday() == prefix_length_schedule_day and timenow.hour == prefix_length_schedule_hour:
             bgp4_plot, bgp6_plot = plot_bgp_prefixes_length()
