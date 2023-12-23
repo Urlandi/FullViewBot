@@ -318,3 +318,125 @@ def plot_bgp_ases_month(period, db):
         return db_api.ERROR_STATE, db_api.ERROR_STATE
 
     return bgp4_prefix_chart_file, bgp6_prefix_chart_file
+
+
+def _plot_bgp_prefixes_year(bgp_prefixes_history, bgp_prefixes_timestamp):
+    prefix_chart_config = pygal.Config()
+    prefix_chart_config.width = CHART_WIDTH
+    prefix_chart_config.height = CHART_HEIGHT
+    prefix_chart_config.show_legend = False
+    prefix_chart_config.fill = True
+    prefix_chart_config.style = PygalStyle(colors=('Navy',))
+    prefix_chart_config.x_labels_major_every = 168
+    prefix_chart_config.x_label_rotation = 40
+    prefix_chart_config.show_minor_x_labels = False
+
+    prefixes_chart = pygal.Line(prefix_chart_config)
+
+    bgp_prefixes_trend = list()
+    for prefixes_dump in bgp_prefixes_history:
+        prefixes_count = _count_prefixes(prefixes_dump)[1]
+        bgp_prefixes_trend.append(prefixes_count)
+
+    prefixes_chart.add('Prefixes', bgp_prefixes_trend)
+    prefixes_chart.x_labels = list(map(lambda timestamp:
+                                       datetime.utcfromtimestamp(timestamp).strftime("%b %d %H:%M"),
+                                       bgp_prefixes_timestamp))
+    return prefixes_chart
+
+
+def plot_bgp_prefixes_year(period, db):
+    bgp_timestamps_history, bgp4_history, bgp6_history = db_api.load_prefixes(period, db, False, True)
+
+    if bgp_timestamps_history is None or bgp4_history is None or bgp6_history is None:
+        return db_api.ERROR_STATE, db_api.ERROR_STATE
+
+    date_period = datetime.utcfromtimestamp(bgp_timestamps_history[0])
+    yearname = date_period.strftime("%Y")
+    year = date_period.year
+
+    bgp_timestamps_year = list(filter(lambda timestamp: datetime.utcfromtimestamp(timestamp).year == year,
+                                      bgp_timestamps_history))
+
+    year_length = len(bgp_timestamps_year)
+
+    prefixes4_chart = _plot_bgp_prefixes_year(bgp4_history[:year_length], bgp_timestamps_history[:year_length])
+    prefixes4_chart.title = resources_messages.bgp4_prefix_trend_chart_title.format(yearname)
+
+    prefixes6_chart = _plot_bgp_prefixes_year(bgp6_history[:year_length], bgp_timestamps_history[:year_length])
+    prefixes6_chart.title = resources_messages.bgp6_prefix_trend_chart_title.format(yearname)
+
+    try:
+        prefixes4_chart.render_to_png(_bgp4_prefix_chart_name)
+        prefixes6_chart.render_to_png(_bgp6_prefix_chart_name)
+
+        bgp4_prefix_chart_file = open(_bgp4_prefix_chart_name, 'rb')
+        bgp6_prefix_chart_file = open(_bgp6_prefix_chart_name, 'rb')
+
+    except (IOError, FileExistsError, FileNotFoundError, OSError) as e:
+        logging.error("RW chart file error - {}".format(e))
+        return db_api.ERROR_STATE, db_api.ERROR_STATE
+
+    return bgp4_prefix_chart_file, bgp6_prefix_chart_file
+
+
+def _plot_bgp_ases_year(bgp_ases_history, bgp_second_ases_history, bgp_ases_timestamp):
+    ases_chart_config = pygal.Config()
+    ases_chart_config.width = CHART_WIDTH
+    ases_chart_config.height = CHART_HEIGHT
+    ases_chart_config.show_legend = False
+    ases_chart_config.fill = True
+    ases_chart_config.style = PygalStyle(colors=('Gold', 'Green',))
+    ases_chart_config.x_labels_major_every = 168
+    ases_chart_config.x_label_rotation = 40
+    ases_chart_config.show_minor_x_labels = False
+
+    ases_chart = pygal.Line(ases_chart_config)
+
+    ases_chart.add('ASes', bgp_ases_history)
+    # ases_chart.add('Only ASes', bgp_second_ases_history, secondary=True, fill=False)
+    ases_chart.x_labels = list(map(lambda timestamp:
+                                   datetime.utcfromtimestamp(timestamp).strftime("%b %d %H:%M"),
+                                   bgp_ases_timestamp))
+    return ases_chart
+
+
+def plot_bgp_ases_year(period, db):
+    bgp_timestamps_history, ases_history = db_api.load_ases(period, db, False, True)
+
+    if bgp_timestamps_history is None or ases_history[0] is None:
+        return db_api.ERROR_STATE, db_api.ERROR_STATE
+
+    date_period = datetime.utcfromtimestamp(bgp_timestamps_history[0])
+    yearname = date_period.strftime("%Y")
+    year = date_period.year
+
+    bgp_timestamps_year = list(filter(lambda timestamp: datetime.utcfromtimestamp(timestamp).year == year,
+                                      bgp_timestamps_history))
+
+    year_length = len(bgp_timestamps_year)
+
+    bgp4_ases_history = list(map(lambda ases_dump: ases_dump[0], ases_history))
+    bgp4_only_ases_history = list(map(lambda ases_dump: ases_dump[2], ases_history))
+    ases4_chart = _plot_bgp_ases_year(bgp4_ases_history[:year_length], bgp4_only_ases_history[:year_length],
+                                       bgp_timestamps_history[:year_length])
+    ases4_chart.title = resources_messages.bgp4_ases_trend_chart_title.format(yearname)
+
+    bgp6_ases_history = list(map(lambda ases_dump: ases_dump[1], ases_history))
+    bgp6_only_ases_history = list(map(lambda ases_dump: ases_dump[3], ases_history))
+    ases6_chart = _plot_bgp_ases_year(bgp6_ases_history[:year_length], bgp6_only_ases_history[:year_length],
+                                       bgp_timestamps_history[:year_length])
+    ases6_chart.title = resources_messages.bgp6_ases_trend_chart_title.format(yearname)
+
+    try:
+        ases4_chart.render_to_png(_bgp4_prefix_chart_name)
+        ases6_chart.render_to_png(_bgp6_prefix_chart_name)
+
+        bgp4_prefix_chart_file = open(_bgp4_prefix_chart_name, 'rb')
+        bgp6_prefix_chart_file = open(_bgp6_prefix_chart_name, 'rb')
+
+    except (IOError, FileExistsError, FileNotFoundError, OSError) as e:
+        logging.error("RW chart file error - {}".format(e))
+        return db_api.ERROR_STATE, db_api.ERROR_STATE
+
+    return bgp4_prefix_chart_file, bgp6_prefix_chart_file

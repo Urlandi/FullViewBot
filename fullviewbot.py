@@ -7,6 +7,7 @@ from subscribers_db import save_bgp_table_status, update_bgp_table_status
 from subscribers_db import subscriber_v4_add, subscriber_v6_add, subscribers_flush
 
 from bgpdump_db import get_bgp_prefixes, plot_bgp_prefixes_length, plot_bgp_prefixes_month, plot_bgp_ases_month
+from bgpdump_db import plot_bgp_prefixes_year, plot_bgp_ases_year
 
 from telegram_bot import telegram_connect
 from telegram_bot_handlers import update_status_all_v4, update_status_all_v6
@@ -60,6 +61,24 @@ def scheduler(db, bot, status_timestamp):
             bgp6_plot.close()
 
         bgp4_plot, bgp6_plot = plot_bgp_ases_month(last_month, db)
+        if bgp4_plot is not None and bgp6_plot is not None:
+            update_status_all_v4(bot, bgp4_plot)
+            update_status_all_v6(bot, bgp6_plot)
+
+            bgp4_plot.close()
+            bgp6_plot.close()
+
+        last_year = round(datetime(prev_month_date.year, 1, 1).timestamp())
+
+        bgp4_plot, bgp6_plot = plot_bgp_prefixes_year(last_year, db)
+        if bgp4_plot is not None and bgp6_plot is not None:
+            update_status_all_v4(bot, bgp4_plot)
+            update_status_all_v6(bot, bgp6_plot)
+
+            bgp4_plot.close()
+            bgp6_plot.close()
+
+        bgp4_plot, bgp6_plot = plot_bgp_ases_year(last_year, db)
         if bgp4_plot is not None and bgp6_plot is not None:
             update_status_all_v4(bot, bgp4_plot)
             update_status_all_v6(bot, bgp6_plot)
