@@ -68,6 +68,10 @@ def scheduler(db, bot, status_timestamp):
             bgp4_plot.close()
             bgp6_plot.close()
 
+    annual_history_scheduler_month = 1
+    
+    if timenow.day == prefix_history_scheduler_day and timenow.hour == prefix_history_scheduler_hour and timenow.month == annual_history_scheduler_month:
+        
         last_year = round(datetime(prev_month_date.year, 1, 1).timestamp())
 
         bgp4_plot, bgp6_plot = plot_bgp_prefixes_year(last_year, db)
