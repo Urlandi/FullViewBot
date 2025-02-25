@@ -123,6 +123,7 @@ def main():
     logging.basicConfig(filename=_logging_file_name,
                         level=logging.INFO,
                         format="'%(asctime)s: %(name)s-%(levelname)s: %(message)s'")
+    logging.getLogger("httpx").setLevel(logging.WARNING)
 
     logging.debug("Database opening")
     subscribers_database = db_connect()
