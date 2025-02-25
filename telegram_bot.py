@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from telegram.ext import Updater, CommandHandler, MessageHandler, CallbackQueryHandler, Filters, MessageFilter
-from telegram import TelegramError
+from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, CallbackQueryHandler
+from telegram.ext.filters import ALL as FilterAll, MessageFilter
+from telegram.error import TelegramError
 
 from config_telegram_auth import TOKEN
 from telegram_bot_handlers import start_cmd, stop_cmd, settings_cmd, help_cmd, echo_cmd, last_status_cmd
@@ -29,30 +30,26 @@ class FilterHelp(MessageFilter):
 def telegram_connect():
 
     try:
-        updater = Updater(token=TOKEN)
-        dispatcher = updater.dispatcher
+        application = ApplicationBuilder().token(TOKEN).build()
+        application.add_error_handler(telegram_error)
 
-        dispatcher.add_handler(CommandHandler("start", start_cmd))
-        dispatcher.add_handler(CommandHandler("stop", stop_cmd))
+        application.add_handler(CommandHandler("start", start_cmd))
+        application.add_handler(CommandHandler("stop", stop_cmd))
 
-        dispatcher.add_handler(CommandHandler("help", help_cmd))
-        dispatcher.add_handler(MessageHandler(FilterHelp(), help_cmd))
+        application.add_handler(CommandHandler("help", help_cmd))
+        application.add_handler(MessageHandler(FilterHelp(), help_cmd))
 
-        dispatcher.add_handler(CommandHandler("settings", settings_cmd))
-        dispatcher.add_handler(MessageHandler(FilterSettings(), settings_cmd))
-        dispatcher.add_handler(CallbackQueryHandler(settings_cmd))
+        application.add_handler(CommandHandler("settings", settings_cmd))
+        application.add_handler(MessageHandler(FilterSettings(), settings_cmd))
+        application.add_handler(CallbackQueryHandler(settings_cmd))
 
-        dispatcher.add_handler(CommandHandler("status", last_status_cmd))
-        dispatcher.add_handler(MessageHandler(FilterLastStatus(), last_status_cmd))
+        application.add_handler(CommandHandler("status", last_status_cmd))
+        application.add_handler(MessageHandler(FilterLastStatus(), last_status_cmd))
 
-        dispatcher.add_handler(MessageHandler(Filters.all, echo_cmd))
-
-        dispatcher.add_error_handler(telegram_error)
-
-        updater.start_polling(drop_pending_updates=True)  # God save the GIL
+        application.add_handler(MessageHandler(FilterAll, echo_cmd)) 
 
     except TelegramError as e:
         logging.fatal("Can't connect to telegram - {}".format(e))
         return None
 
-    return updater
+    return application

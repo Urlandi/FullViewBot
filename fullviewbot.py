@@ -18,14 +18,22 @@ from db_api import db_connect, db_close, load_subscribers, base_dirname
 import logging
 
 repost_task = None
-
+repost_task_cancel = False
 
 def scheduler(db, bot, status_timestamp):
+
+    global repost_task
+    global repost_task_cancel
+
+    if repost_task_cancel:
+        repost_task = None
+        return
 
     timenow = datetime.now()
     timestampnow = round(timenow.timestamp())
 
-    bgp_timestamp, bgp4_status, bgp6_status = get_bgp_prefixes(status_timestamp, db)
+    bgp_timestamp, bgp4_status, bgp6_status = get_bgp_prefixes(status_timestamp, db)    
+
     if bgp4_status and bgp6_status:
         update_status_all_v4(bot, bgp4_status)
         update_status_all_v6(bot, bgp6_status)
@@ -97,7 +105,6 @@ def scheduler(db, bot, status_timestamp):
 
     timer_start_at = (timestampnow // next_start_in + 1) * next_start_in - timestampnow + internet_wait
 
-    global repost_task
     repost_task = Timer(timer_start_at, scheduler, (db, bot, bgp_timestamp))
     repost_task.start()
 
@@ -158,15 +165,18 @@ def main():
     logging.debug("Telegram bot started")
 
     logging.debug("Scheduler job starting")
-    if scheduler(subscribers_database, telegram_job.bot, bgp_timestamp) != DONE:
+    if scheduler(subscribers_database, telegram_job.updater.bot, bgp_timestamp) != DONE:
         exit_status_code = STOP_AND_EXIT
         return exit_status_code
     logging.debug("Scheduler job run")
 
-    telegram_job.idle()
-
+    telegram_job.run_polling(drop_pending_updates=True)
+    
+    global repost_task_cancel
+    repost_task_cancel = True
+    
     global repost_task
-    if repost_task.is_alive():
+    if repost_task is not None and repost_task.is_alive():
         repost_task.cancel()
 
     subscribers_flush(subscribers_database)

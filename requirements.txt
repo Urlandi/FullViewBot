@@ -1,4 +1,4 @@
-python-telegram-bot>=13.7.0
+python-telegram-bot>=21.0.0
 pygal>=3.0.0
 cairosvg>=2.5.2
 python-dateutil>=1.11.0
