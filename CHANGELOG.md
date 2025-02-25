@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.5.0] - 2025-02-25
 ### Changed
  - Lib "Python-telegram-bot" has been updated to version 21
  - Threads replaced by Asyncio
@@ -34,6 +36,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
  - Typos
 
 
-[Unreleased]: https://github.com/urlandi/FullViewBot/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/urlandi/FullViewBot/compare/v1.5.0...HEAD
+[1.5.0]: https://github.com/urlandi/FullViewBot/compare/v1.1.0...v1.5.0
 [1.1.0]: https://github.com/urlandi/FullViewBot/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/urlandi/FullViewBot/compare/v0.5.0...v1.0.0
