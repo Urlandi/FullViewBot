@@ -7,9 +7,6 @@ import resources_messages
 
 from pathlib import Path
 
-from queue import Queue, Empty
-from threading import Thread
-
 from subscribers_db import subscriber_start, subscriber_stop
 from subscribers_db import subscriber_update, is_subscriber_v4, is_subscriber_v6
 
