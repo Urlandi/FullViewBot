@@ -107,7 +107,7 @@ async def send_status(bot, subscriber_id, message):
         else:
             await bot.send_photo(chat_id=subscriber_id, photo=open(message.name, 'rb'))
 
-    except (telegram.error.Unauthorized,
+    except (telegram.error.Forbidden,
             telegram.error.BadRequest,
             telegram.error.ChatMigrated) as e:
 
