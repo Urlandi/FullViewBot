@@ -150,7 +150,8 @@ def _update_status_all(bot, subscribers, bgp_status_msg):
 
     global _update_task_threads
     if _update_task_threads is None:
-        _update_task_threads = asyncio.get_event_loop()
+        logging.fatal("Scheduler fatal, no spinning")
+        return
 
     send_threads = set()
     for subscriber_id in subscribers:
