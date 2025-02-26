@@ -17,7 +17,7 @@ from subscribers_db import get_bgp_table_status, get_subscribers_v4, get_subscri
 
 _update_task_threads = None
 
-MAX_UPDATE_QUEUE = 5
+MAX_UPDATE_QUEUE = 20
 WAIT_TIME = 2
 
 
@@ -149,8 +149,7 @@ async def _send_status_queued(bot, subscriber_id, bgp_status_msg):
 
     if subscriber_id is not None:
         if not await send_status(bot, subscriber_id, bgp_status_msg):
-            subscriber_stop(subscriber_id)
-        
+            subscriber_stop(subscriber_id)       
 
 def _update_status_all(bot, subscribers, bgp_status_msg):
 
@@ -160,13 +159,16 @@ def _update_status_all(bot, subscribers, bgp_status_msg):
         return
 
     send_threads = set()
+    threads = 1
+    
     for subscriber_id in subscribers:
         new_send_thread = _update_task_threads.create_task(_send_status_queued(bot, subscriber_id, bgp_status_msg))     
         new_send_thread.add_done_callback(send_threads.discard)
         send_threads.add(new_send_thread)
-          
-        if len(send_threads) % MAX_UPDATE_QUEUE == 0:
+        time.sleep(WAIT_TIME / 5)        
+        if threads % MAX_UPDATE_QUEUE == 0:
             time.sleep(WAIT_TIME)
+        threads += 1
 
 
 def update_status_all_v4(bot, status):

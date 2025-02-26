@@ -27,7 +27,7 @@ class FilterHelp(MessageFilter):
         return keyboard_buttons_name["help_name"] == message.text
 
 MAX_CONNECTIONS_POOL = 120
-MAX_CONCURRENT_UPDATES = 4
+MAX_CONCURRENT_UPDATES = 1
 
 def telegram_connect():
 
