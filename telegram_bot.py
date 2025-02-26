@@ -26,13 +26,11 @@ class FilterHelp(MessageFilter):
     def filter(self, message):
         return keyboard_buttons_name["help_name"] == message.text
 
-MAX_CONNECTIONS_POOL = 120
-MAX_CONCURRENT_UPDATES = 1
 
 def telegram_connect():
 
     try:
-        application = ApplicationBuilder().token(TOKEN).pool_timeout(MAX_CONNECTIONS_POOL).concurrent_updates(MAX_CONCURRENT_UPDATES).build()
+        application = ApplicationBuilder().token(TOKEN).build()
         application.add_error_handler(telegram_error)
 
         application.add_handler(CommandHandler("start", start_cmd))

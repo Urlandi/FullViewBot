@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 import asyncio
+
 import logging
 import time
 
 import telegram
 import resources_messages
-
-from pathlib import Path
 
 from subscribers_db import subscriber_start, subscriber_stop
 from subscribers_db import subscriber_update, is_subscriber_v4, is_subscriber_v6
@@ -16,9 +15,6 @@ from subscribers_db import tablev4_selector_unchecked, tablev6_selector_unchecke
 from subscribers_db import get_bgp_table_status, get_subscribers_v4, get_subscribers_v6
 
 _update_task_threads = None
-
-MAX_UPDATE_QUEUE = 20
-WAIT_TIME = 2
 
 
 async def get_task_threads(application):
@@ -105,11 +101,11 @@ async def echo_cmd(update, context):
 async def send_status(bot, subscriber_id, message):
     sent = True
     try:
-        if isinstance(message, str):
+        if isinstance(message, str):            
             await bot.send_message(chat_id=subscriber_id,
                              text=message,
                              parse_mode=telegram.constants.ParseMode.HTML,
-                             disable_web_page_preview=True)
+                             disable_web_page_preview=True)            
         else:
             await bot.send_photo(chat_id=subscriber_id, photo=open(message.name, 'rb'))
 
@@ -145,11 +141,13 @@ async def last_status_cmd(update, context):
         await update.message.reply_text(resources_messages.subscriptions_empty_msg)
 
 
-async def _send_status_queued(bot, subscriber_id, bgp_status_msg):
+async def _send_status_queued(bot, subscribers, bgp_status_msg):
 
-    if subscriber_id is not None:
+    for subscriber_id in subscribers:
         if not await send_status(bot, subscriber_id, bgp_status_msg):
-            subscriber_stop(subscriber_id)       
+            subscriber_stop(subscriber_id)
+        await asyncio.sleep(0.3)
+        
 
 def _update_status_all(bot, subscribers, bgp_status_msg):
 
@@ -158,18 +156,9 @@ def _update_status_all(bot, subscribers, bgp_status_msg):
         logging.fatal("Scheduler fatal, no spinning")
         return
 
-    send_threads = set()
-    threads = 1
-    
-    for subscriber_id in subscribers:
-        new_send_thread = _update_task_threads.create_task(_send_status_queued(bot, subscriber_id, bgp_status_msg))     
-        new_send_thread.add_done_callback(send_threads.discard)
-        send_threads.add(new_send_thread)
-        time.sleep(WAIT_TIME / 5)        
-        if threads % MAX_UPDATE_QUEUE == 0:
-            time.sleep(WAIT_TIME)
-        threads += 1
-
+    send_task = _update_task_threads.create_task(_send_status_queued(bot, subscribers, bgp_status_msg))     
+    while not send_task.done():
+        pass
 
 def update_status_all_v4(bot, status):
     subscribers_v4 = get_subscribers_v4()
