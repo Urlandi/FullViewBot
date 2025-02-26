@@ -22,13 +22,13 @@ repost_task_cancel = False
 
 
 def scheduler(db, bot, status_timestamp):
-
+   
     global repost_task
     global repost_task_cancel
 
     if repost_task_cancel:
         repost_task = None
-        return
+        return 0
 
     timenow = datetime.now()
     timestampnow = round(timenow.timestamp())
@@ -99,7 +99,7 @@ def scheduler(db, bot, status_timestamp):
             bgp4_plot.close()
             bgp6_plot.close()
 
-    in_an_hour = 3600
+    in_an_hour = 60 * 60
     next_start_in = in_an_hour
 
     internet_wait = 30
@@ -165,19 +165,24 @@ def main():
         return exit_status_code
     logging.debug("Telegram bot started")
 
+    global repost_task
+
     logging.debug("Scheduler job starting")
-    if scheduler(subscribers_database, telegram_job.updater.bot, bgp_timestamp) != DONE:
-        exit_status_code = STOP_AND_EXIT
-        return exit_status_code
+    try:
+        first_start_in = 5
+        repost_task = Timer(first_start_in, scheduler, (subscribers_database, telegram_job.updater.bot, bgp_timestamp))
+        repost_task.start()
+    except RuntimeError as e:
+         logging.fatal("Scheduler job didn't start - {}".format(e))
+         return STOP_AND_EXIT                            
     logging.debug("Scheduler job run")
 
-    telegram_job.post_init = get_task_threads
+    telegram_job.post_init = get_task_threads    
     telegram_job.run_polling(drop_pending_updates=True)
     
     global repost_task_cancel
-    repost_task_cancel = True
+    repost_task_cancel = True    
     
-    global repost_task
     if repost_task is not None and repost_task.is_alive():
         repost_task.cancel()
 

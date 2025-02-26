@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import asyncio
 import logging
+import time
 
 import telegram
 import resources_messages
@@ -16,9 +17,14 @@ from subscribers_db import get_bgp_table_status, get_subscribers_v4, get_subscri
 
 _update_task_threads = None
 
+MAX_UPDATE_QUEUE = 5
+WAIT_TIME = 2
+
+
 async def get_task_threads(application):
     global _update_task_threads
     _update_task_threads = asyncio.get_event_loop()
+
 
 async def start_cmd(update, context):
     subscriber_id = update.message.from_user.id
@@ -158,6 +164,9 @@ def _update_status_all(bot, subscribers, bgp_status_msg):
         new_send_thread = _update_task_threads.create_task(_send_status_queued(bot, subscriber_id, bgp_status_msg))     
         new_send_thread.add_done_callback(send_threads.discard)
         send_threads.add(new_send_thread)
+          
+        if len(send_threads) % MAX_UPDATE_QUEUE == 0:
+            time.sleep(WAIT_TIME)
 
 
 def update_status_all_v4(bot, status):
