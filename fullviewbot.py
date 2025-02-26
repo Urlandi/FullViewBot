@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import asyncio
+
 from threading import Timer
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
@@ -10,7 +12,7 @@ from bgpdump_db import get_bgp_prefixes, plot_bgp_prefixes_length, plot_bgp_pref
 from bgpdump_db import plot_bgp_prefixes_year, plot_bgp_ases_year
 
 from telegram_bot import telegram_connect
-from telegram_bot_handlers import update_status_all_v4, update_status_all_v6
+from telegram_bot_handlers import update_status_all_v4, update_status_all_v6, get_task_threads
 
 
 from db_api import db_connect, db_close, load_subscribers, base_dirname
@@ -19,6 +21,7 @@ import logging
 
 repost_task = None
 repost_task_cancel = False
+
 
 def scheduler(db, bot, status_timestamp):
 
@@ -32,7 +35,7 @@ def scheduler(db, bot, status_timestamp):
     timenow = datetime.now()
     timestampnow = round(timenow.timestamp())
 
-    bgp_timestamp, bgp4_status, bgp6_status = get_bgp_prefixes(status_timestamp, db)    
+    bgp_timestamp, bgp4_status, bgp6_status = get_bgp_prefixes(0, db)    
 
     if bgp4_status and bgp6_status:
         update_status_all_v4(bot, bgp4_status)
@@ -98,7 +101,7 @@ def scheduler(db, bot, status_timestamp):
             bgp4_plot.close()
             bgp6_plot.close()
 
-    in_an_hour = 3600
+    in_an_hour = 30
     next_start_in = in_an_hour
 
     internet_wait = 30
@@ -109,7 +112,6 @@ def scheduler(db, bot, status_timestamp):
     repost_task.start()
 
     return 0
-
 
 DONE = 0
 STOP_AND_EXIT = 1
@@ -171,6 +173,7 @@ def main():
         return exit_status_code
     logging.debug("Scheduler job run")
 
+    telegram_job.post_init = get_task_threads
     telegram_job.run_polling(drop_pending_updates=True)
     
     global repost_task_cancel

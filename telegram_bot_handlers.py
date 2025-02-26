@@ -19,6 +19,10 @@ from subscribers_db import get_bgp_table_status, get_subscribers_v4, get_subscri
 
 _update_task_threads = None
 
+async def get_task_threads(application):
+    global _update_task_threads
+    _update_task_threads = asyncio.get_event_loop()
+
 async def start_cmd(update, context):
     subscriber_id = update.message.from_user.id
     subscriber_start(subscriber_id)
