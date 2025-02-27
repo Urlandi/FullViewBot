@@ -141,13 +141,18 @@ async def last_status_cmd(update, context):
         await update.message.reply_text(resources_messages.subscriptions_empty_msg)
 
 
-async def _send_status_queued(bot, subscribers, bgp_status_msg):
+async def _send_status_queued(bot, subscribers_queue, subscribers_blocked_queue, bgp_status_msg):
 
-    for subscriber_id in subscribers:
-        if not await send_status(bot, subscriber_id, bgp_status_msg):
-            subscriber_stop(subscriber_id)
-        await asyncio.sleep(0.3)
-        
+    try:
+        while not subscribers_queue.empty():
+            subscriber_id = await subscribers_queue.get()
+            if not await send_status(bot, subscriber_id, bgp_status_msg):
+                await subscribers_blocked_queue.put(subscriber_id)
+            subscribers_queue.task_done()
+            await asyncio.sleep(0.3)
+    except asyncio.QueueEmpty:
+         pass
+
 
 def _update_status_all(bot, subscribers, bgp_status_msg):
 
@@ -155,10 +160,31 @@ def _update_status_all(bot, subscribers, bgp_status_msg):
     if _update_task_threads is None:
         logging.fatal("Scheduler fatal, no spinning")
         return
+    subscribers_queue = asyncio.Queue()
+    subscribers_blocked_queue = asyncio.Queue()
 
-    send_task = _update_task_threads.create_task(_send_status_queued(bot, subscribers, bgp_status_msg))     
+    for subscriber_id in subscribers:
+        subscribers_queue.put_nowait(subscriber_id)
+    
+    send_task = _update_task_threads.create_task(_send_status_queued(bot, subscribers_queue, subscribers_blocked_queue, bgp_status_msg))     
+    
     while not send_task.done():
         pass
+    
+    try:
+        send_task.result()
+    except:
+        pass
+
+    subscribers_blocked = set()
+    try:
+        while not subscribers_blocked_queue.empty():
+            subscribers_blocked.add(subscribers_blocked_queue.get_nowait())
+    except asyncio.QueueEmpty:
+         pass
+    
+    for subscriber_id in subscribers_blocked:
+        subscriber_stop(subscriber_id)    
 
 def update_status_all_v4(bot, status):
     subscribers_v4 = get_subscribers_v4()
