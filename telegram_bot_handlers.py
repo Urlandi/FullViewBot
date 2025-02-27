@@ -15,11 +15,17 @@ from subscribers_db import tablev4_selector_unchecked, tablev6_selector_unchecke
 from subscribers_db import get_bgp_table_status, get_subscribers_v4, get_subscribers_v6
 
 _update_task_threads = None
-
+_subscribers_queue = None
+_subscribers_blocked_queue = None
 
 async def get_task_threads(application):
     global _update_task_threads
     _update_task_threads = asyncio.get_event_loop()
+
+    global _subscribers_queue
+    global _subscribers_blocked_queue
+    _subscribers_queue = asyncio.Queue()
+    _subscribers_blocked_queue = asyncio.Queue()
 
 
 async def start_cmd(update, context):
@@ -160,13 +166,14 @@ def _update_status_all(bot, subscribers, bgp_status_msg):
     if _update_task_threads is None:
         logging.fatal("Scheduler fatal, no spinning")
         return
-    subscribers_queue = asyncio.Queue()
-    subscribers_blocked_queue = asyncio.Queue()
+
+    global _subscribers_queue
+    global _subscribers_blocked_queue
 
     for subscriber_id in subscribers:
-        subscribers_queue.put_nowait(subscriber_id)
+        _subscribers_queue.put_nowait(subscriber_id)
     
-    send_task = _update_task_threads.create_task(_send_status_queued(bot, subscribers_queue, subscribers_blocked_queue, bgp_status_msg))     
+    send_task = _update_task_threads.create_task(_send_status_queued(bot, _subscribers_queue, _subscribers_blocked_queue, bgp_status_msg))     
     
     while not send_task.done():
         pass
@@ -178,8 +185,8 @@ def _update_status_all(bot, subscribers, bgp_status_msg):
 
     subscribers_blocked = set()
     try:
-        while not subscribers_blocked_queue.empty():
-            subscribers_blocked.add(subscribers_blocked_queue.get_nowait())
+        while not _subscribers_blocked_queue.empty():
+            subscribers_blocked.add(_subscribers_blocked_queue.get_nowait())
     except asyncio.QueueEmpty:
          pass
     
