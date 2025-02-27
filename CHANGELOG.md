@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.5.3] - 2025-02-27
+### Added
+ - Asyncio.Queue
+
 ## [1.5.2] - 2025-02-26
 ### Added
  - Simple post rate limiter 
@@ -42,7 +46,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
  - Typos
 
 
-[Unreleased]: https://github.com/urlandi/FullViewBot/compare/v1.5.2...HEAD
+[Unreleased]: https://github.com/urlandi/FullViewBot/compare/v1.5.3...HEAD
+[1.5.3]: https://github.com/urlandi/FullViewBot/compare/v1.5.2...v1.5.3
 [1.5.2]: https://github.com/urlandi/FullViewBot/compare/v1.5.0...v1.5.2
 [1.5.0]: https://github.com/urlandi/FullViewBot/compare/v1.1.0...v1.5.0
 [1.1.0]: https://github.com/urlandi/FullViewBot/compare/v1.0.0...v1.1.0
