@@ -33,7 +33,7 @@ def scheduler(db, bot, status_timestamp):
     timenow = datetime.now()
     timestampnow = round(timenow.timestamp())
 
-    bgp_timestamp, bgp4_status, bgp6_status = get_bgp_prefixes(0, db)    
+    bgp_timestamp, bgp4_status, bgp6_status = get_bgp_prefixes(status_timestamp, db)    
 
     if bgp4_status and bgp6_status:
         update_status_all_v4(bot, bgp4_status)
@@ -100,7 +100,7 @@ def scheduler(db, bot, status_timestamp):
             bgp6_plot.close()
 
     in_an_hour = 60 * 60
-    next_start_in = 1#in_an_hour
+    next_start_in = in_an_hour
 
     internet_wait = 30
 
