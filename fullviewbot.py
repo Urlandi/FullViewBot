@@ -33,6 +33,16 @@ def scheduler(db, bot, status_timestamp):
     timenow = datetime.now()
     timestampnow = round(timenow.timestamp())
 
+    in_an_hour = 60 * 60
+    next_start_in = in_an_hour
+
+    internet_wait = 30
+
+    timer_start_at = (timestampnow // next_start_in + 1) * next_start_in - timestampnow + internet_wait
+
+    repost_task = Timer(timer_start_at, scheduler, (db, bot, bgp_timestamp))
+    repost_task.start()
+
     bgp_timestamp, bgp4_status, bgp6_status = get_bgp_prefixes(status_timestamp, db)    
 
     if bgp4_status and bgp6_status:
@@ -97,17 +107,7 @@ def scheduler(db, bot, status_timestamp):
             update_status_all_v6(bot, bgp6_plot)
 
             bgp4_plot.close()
-            bgp6_plot.close()
-
-    in_an_hour = 60 * 60
-    next_start_in = in_an_hour
-
-    internet_wait = 30
-
-    timer_start_at = (timestampnow // next_start_in + 1) * next_start_in - timestampnow + internet_wait
-
-    repost_task = Timer(timer_start_at, scheduler, (db, bot, bgp_timestamp))
-    repost_task.start()
+            bgp6_plot.close()    
 
     return 0
 
